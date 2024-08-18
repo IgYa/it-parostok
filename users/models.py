@@ -1,0 +1,49 @@
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional
+from sqlalchemy import String, func, Enum, Boolean, Date
+from pydantic import EmailStr
+from datetime import date, datetime
+from enum import Enum as PyEnum
+from db import Model
+
+
+class Role(PyEnum):
+    employee = "employee"
+    employer = "employer"
+
+
+class UserOrm(Model):
+    """ User Model, tablename: "users"
+    Attributes:
+        id (int, primary_key): User ID
+        email (EmailStr, NOT NULL): Email address, Unique field, identification of user by this field
+        name (str): Username
+        surname (str): User surname
+        who_are_you(Role): User - "employee" or "employer"
+        photo (str): names of the file for this user,
+                     the file name is formed from the current date and time,
+                     the files are stored in the folder static/images,
+                     format "%Y%m%d_%H%M%S_%f".jpg, .png, .jpeg, .gif, .webp
+        created_at (date): Date user was created, defaults to now
+        last_login (datetime): Date and time last login of this user
+        is_super: Whether this user is superuser, defaults to False
+        is_active (bool): Whether this user is active, defaults to True
+        """
+
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[EmailStr] = mapped_column(String, unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[Optional[str]]
+    surname: Mapped[Optional[str]]
+    who_are_you: Mapped[Optional[Role]] = mapped_column(Enum(Role))
+    photo: Mapped[Optional[str]]
+    created_at: Mapped[date] = mapped_column(Date, server_default=func.current_date())
+    last_login: Mapped[Optional[datetime]]
+    is_super: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+
+
+# Додамо зворотний зв'язок у модель UserOrm
+UserOrm.project = relationship("ProjectOrm", back_populates="user")
