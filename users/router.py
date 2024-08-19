@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Response, HTTPException, Depends
+from typing import Optional, Literal
+from fastapi import APIRouter, Response, HTTPException, Depends, File, UploadFile, Form
 from users.repo import UsersRepo
 from users.schemas import UserAdd, User, UserUpdate
 from users.auth import get_password_hash, authenticate_user, create_access_token
@@ -51,12 +52,40 @@ async def read_user_info(current_user: User = Depends(get_current_user)) -> User
     return current_user
 
 
+# @router.post("/update_old")
+# async def update_user_info(user_update: UserUpdate,
+#                            current_user: User = Depends(get_current_user)) -> User:
+#     """ Update current user info """
+#
+#     user = await UsersRepo.update_one(user_update, current_user)
+#     return user
+
 @router.post("/update")
-async def update_user_info(user_update: UserUpdate,
-                           current_user: User = Depends(get_current_user)) -> User:
+async def update_user_info(
+        name: str = Form(...),
+        surname: str = Form(...),
+        who_are_you: str = Form(...),
+        image: Optional[UploadFile] = File(None),
+        current_user: User = Depends(get_current_user)) -> User:
     """ Update current user info """
 
-    user = await UsersRepo.update_one(user_update, current_user)
+    photo = ""
+    if image:
+        # Uploading image file and getting the new filenames
+        photo = await UsersRepo.add_image(image)
+
+    if who_are_you:
+        if who_are_you not in ['employee', 'employer']:
+            raise HTTPException(400,
+                                detail="Choose from the list ['employee', 'employer']")
+
+    user_data = UserUpdate(
+        name=name,
+        surname=surname,
+        who_are_you=who_are_you,
+        photo=photo)
+
+    user = await UsersRepo.update_one(user_data, current_user)
     return user
 
 

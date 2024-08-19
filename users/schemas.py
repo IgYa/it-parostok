@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from fastapi import HTTPException
 from typing import Optional, Literal
 from datetime import date, datetime
 from users.models import Role
@@ -15,6 +16,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     surname: Optional[str] = None
     who_are_you: Optional[Literal["employee", "employer"]] = None
+    photo: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
     @field_validator("who_are_you", mode="before")
@@ -30,7 +32,7 @@ class User(UserUpdate):
     email: EmailStr
     created_at: date
     last_login: Optional[datetime] = None
-    photo_url: Optional[str] = None
+
     # is_super: bool - this field is available only for the superuser
     # is_active: bool - this field is available only for the superuser
 
