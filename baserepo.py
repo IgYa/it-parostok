@@ -7,6 +7,7 @@ from config import PATH_IMAGES
 import aiofiles
 from PIL import Image
 from io import BytesIO
+import shutil
 
 
 class BaseRepo:
@@ -87,11 +88,18 @@ class BaseRepo:
         # Get the current date and time in the required format, form a new file name
         now = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
         new_filename = f"{now}{extension}"
+        path = f"{PATH_IMAGES}{new_filename}"
 
         # Use aiofiles for asynchronous file operations
-        async with aiofiles.open(f"{PATH_IMAGES}{new_filename}", "wb") as buffer:
-            content = await file.read()  # Read file content asynchronously
+        async with aiofiles.open(path, "wb") as buffer:
             await buffer.write(content)  # Write file content asynchronously
+
+            # Перевірка чи файл дійсно збережений і не порожній
+        file_size = os.path.getsize(path)
+        if file_size == 0:
+            raise HTTPException(status_code=500, detail="Saved file is empty")
+
+        print(f"File {new_filename} saved successfully with size {file_size} bytes")
 
         return new_filename
 

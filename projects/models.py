@@ -5,6 +5,27 @@ from datetime import datetime
 from db import Model
 
 
+class CategoriaOrm(Model):
+    """Project Model, tablename: "projects"
+    Attributes:
+        id (int, primary_key):  Categoria ID
+        name (str): Name of the  Categoria
+        discription (str): Text of the  Categoria
+        is_active (bool): Whether the project is published
+        """
+    __tablename__ = "categories"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+
+    # project = relationship("ProjectORM", back_populates="categoria")
+
+    def __str__(self):
+        return f"Categoria - {self.name}"
+
+
 class ProjectOrm(Model):
     """Project Model, tablename: "projects"
     Attributes:
@@ -25,6 +46,9 @@ class ProjectOrm(Model):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id",
                                                     onupdate="RESTRICT",
                                                     ondelete="RESTRICT"))
+    cat_id: Mapped[int] = mapped_column(ForeignKey("categories.id",
+                                                    onupdate="RESTRICT",
+                                                    ondelete="RESTRICT"))
     title: Mapped[str]
     text: Mapped[str]
     photos: Mapped[Optional[List[str]]] = mapped_column(JSON)
@@ -34,3 +58,11 @@ class ProjectOrm(Model):
 
     # Визначення зв'язку між ProjectOrm і UserOrm
     user = relationship("UserOrm", back_populates="project")
+    categoria = relationship("CategoriaOrm", back_populates="project")
+
+    def __str__(self):
+        return f"Project #{self.id} - {self.title}"
+
+
+# Додамо зворотний зв'язок у модель CategoriaOrm
+CategoriaOrm.project = relationship("ProjectOrm", back_populates="categoria")

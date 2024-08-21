@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+
+from admin.auth import authentication_backend
 from projects.router import router as project_router
 from users.router import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
-
+from sqladmin import Admin
+from db import engine
+from admin.models import UserAdmin, ProjectAdmin, ProjectView, UserView, CategoriaAdmin
 import uvicorn
 
 
@@ -28,6 +32,15 @@ app.add_middleware(
     allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers",
                    "Access-Control-Allow-Origin", "Authorization"]
 )
+
+
+admin = Admin(app, engine, authentication_backend=authentication_backend)
+
+admin.add_view(UserAdmin)
+admin.add_view(ProjectAdmin)
+admin.add_view(CategoriaAdmin)
+# admin.add_view(ProjectView)
+# admin.add_view(UserView)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)  # або в терміналі uvicorn main:app --reload

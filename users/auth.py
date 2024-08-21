@@ -1,24 +1,24 @@
 from datetime import timedelta, datetime
 from pydantic import EmailStr
 from jose import jwt
-from passlib.context import CryptContext
+from passlib.hash import pbkdf2_sha256
 from users.repo import UsersRepo
 from users.schemas import User
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, AUTH_KEY
 from db import async_session
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(ACCESS_TOKEN_EXPIRE_MINUTES)
 
 
-def verify_password(plain_password, hashed_password) -> bool:
+def verify_password(password, hashed_password) -> bool:
     """ Compare the entered password with the password hash stored in the database """
-    return pwd_context.verify(plain_password, hashed_password)
+    return pbkdf2_sha256.verify(password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """ Сounting hashed password """
-    return pwd_context.hash(password)
+    # return pwd_context.hash(password)
+    return pbkdf2_sha256.hash(password)
 
 
 def create_access_token(data: dict) -> str:

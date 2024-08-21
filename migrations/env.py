@@ -4,7 +4,7 @@ from sqlalchemy import pool
 from alembic import context
 from db import DB_URL, Model
 from users.models import UserOrm
-from projects.models import ProjectOrm
+from projects.models import ProjectOrm, CategoriaOrm
 
 
 # this is the Alembic Config object, which provides

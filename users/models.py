@@ -44,6 +44,8 @@ class UserOrm(Model):
     is_super: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
+    def __str__(self):
+        return f"{self.name} {self.surname} ({self.email})"
 
 # Додамо зворотний зв'язок у модель UserOrm
 UserOrm.project = relationship("ProjectOrm", back_populates="user")
