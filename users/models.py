@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
-from sqlalchemy import String, func, Enum, Boolean, Date
+from sqlalchemy import String, Enum, Boolean
 from pydantic import EmailStr
 from datetime import date, datetime
 from enum import Enum as PyEnum
-from db import Model
+from db import Model, intpk, my_datetime
 
 
 class Role(PyEnum):
@@ -32,14 +32,14 @@ class UserOrm(Model):
 
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[intpk]
     email: Mapped[EmailStr] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     name: Mapped[Optional[str]]
     surname: Mapped[Optional[str]]
     who_are_you: Mapped[Optional[Role]] = mapped_column(Enum(Role))
     photo: Mapped[Optional[str]]
-    created_at: Mapped[date] = mapped_column(Date, server_default=func.current_date())
+    created_at: Mapped[my_datetime]
     last_login: Mapped[Optional[datetime]]
     is_super: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")

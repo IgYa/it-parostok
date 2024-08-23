@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-from fastapi import HTTPException
 from typing import Optional, Literal
 from datetime import date, datetime
 from users.models import Role
@@ -37,8 +36,16 @@ class User(UserUpdate):
     # is_active: bool - this field is available only for the superuser
 
 
+# class UserPasswordResetRequest(BaseModel):
+#     """ Validation scheme for reset User's password - Request"""
+#     email: EmailStr
 
 
+
+# class UserPasswordReset(BaseModel):
+#     """ Validation scheme for reset User's password - Response and Reset"""
+#     token: str
+#     new_password: str
 
 
 

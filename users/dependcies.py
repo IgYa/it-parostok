@@ -6,6 +6,7 @@ from users.repo import UsersRepo
 from users.schemas import User, UserUpdate
 from db import async_session
 
+
 def get_token(request: Request):
     """ Get access a token from a cookie """
     token = request.cookies.get("parostok_access_token")
@@ -47,4 +48,6 @@ async def get_current_superuser(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-
+async def get_db():
+    async with async_session() as session:
+        yield session

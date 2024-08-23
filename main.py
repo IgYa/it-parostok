@@ -7,7 +7,7 @@ from users.router import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
 from db import engine
-from admin.models import UserAdmin, ProjectAdmin, ProjectView, UserView, CategoriaAdmin
+from admin.models import UserAdmin, ProjectAdmin, CategoriaAdmin
 import uvicorn
 
 
@@ -39,8 +39,7 @@ admin = Admin(app, engine, authentication_backend=authentication_backend)
 admin.add_view(UserAdmin)
 admin.add_view(ProjectAdmin)
 admin.add_view(CategoriaAdmin)
-# admin.add_view(ProjectView)
-# admin.add_view(UserView)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)  # або в терміналі uvicorn main:app --reload

@@ -17,7 +17,6 @@ def verify_password(password, hashed_password) -> bool:
 
 def get_password_hash(password: str) -> str:
     """ Сounting hashed password """
-    # return pwd_context.hash(password)
     return pbkdf2_sha256.hash(password)
 
 
@@ -36,7 +35,7 @@ async def authenticate_user(email: EmailStr, password: str) -> User:
 
     user = await UsersRepo.get_one(email=email)
     if user and verify_password(password, user.password):
-        # Оновлення last_login
+        # Update last_login
         user.last_login = datetime.utcnow()
         async with async_session() as ss:
             ss.add(user)

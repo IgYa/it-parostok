@@ -13,6 +13,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 from users.models import UserOrm
 from users.auth import get_password_hash
+from config import ADMIN_EMAIL, ADMIN_PASSWORD
 
 
 # revision identifiers, used by Alembic.
@@ -65,9 +66,9 @@ def upgrade() -> None:
     session = Session(bind=bind)
 
     # Створення адміністратора
-    admin_pass = "admin_password"
+    admin_pass = ADMIN_PASSWORD
     admin_user = UserOrm(
-        email="admin@i.ua",
+        email=ADMIN_EMAIL,
         password=get_password_hash(admin_pass),
         is_super=True,
     )
@@ -77,6 +78,24 @@ def upgrade() -> None:
     print(f"Create superuser, email: {admin_user.email}, password: {admin_pass}")
     print("Please log in as an superuser and change your password")
     print("*" * 60)
+
+    # Додавання тригера до таблиці projects
+    op.execute("""
+           CREATE OR REPLACE FUNCTION update_updated_at()
+           RETURNS TRIGGER AS $$
+           BEGIN
+               NEW.updated_at = NOW();
+               RETURN NEW;
+           END;
+           $$ LANGUAGE plpgsql;
+       """)
+
+    op.execute("""
+           CREATE TRIGGER set_updated_at
+           BEFORE UPDATE ON public.projects
+           FOR EACH ROW
+           EXECUTE FUNCTION update_updated_at();
+       """)
     # ### end Alembic commands ###
 
 
@@ -86,4 +105,12 @@ def downgrade() -> None:
     op.drop_table('users')
     op.drop_table('categories')
     op.execute('DROP TYPE role')
+    # Видалення тригера і функції в разі відкату міграції
+    op.execute("""
+           DROP TRIGGER IF EXISTS set_updated_at ON public.projects;
+       """)
+
+    op.execute("""
+           DROP FUNCTION IF EXISTS update_updated_at();
+       """)
     # ### end Alembic commands ###

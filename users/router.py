@@ -1,9 +1,10 @@
-from typing import Optional, Literal
+from typing import Optional
 from fastapi import APIRouter, Response, HTTPException, Depends, File, UploadFile, Form
 from users.repo import UsersRepo
 from users.schemas import UserAdd, User, UserUpdate
 from users.auth import get_password_hash, authenticate_user, create_access_token
 from users.dependcies import get_current_user, get_current_superuser
+from pydantic import EmailStr
 
 
 router = APIRouter(
@@ -89,6 +90,34 @@ async def update_user_info(
     return user
 
 
+@router.post("/change")
+async def change_email_password(
+        email: str = Form(None),
+        password: str = Form(None),
+        current_user: UserAdd = Depends(get_current_user)) -> EmailStr:
+    """ Update current user email, password """
+
+    if email:
+        # check if the entered email already exists in the database
+        existing_user = await UsersRepo.get_one(email=email)
+        if existing_user:
+            raise HTTPException(status_code=409, detail="This email is already taken")
+    else:
+        email = current_user.email
+
+    if password:
+        hashed_password = get_password_hash(password)
+    else:
+        hashed_password = current_user.password
+
+    user_data = UserAdd(
+        email=email,
+        password=hashed_password)
+
+    await UsersRepo.update_one(user_data, current_user)
+    return current_user.email
+
+
 @router.get("/all")
 async def get_all_users(current_user: User = Depends(get_current_superuser)) -> list[User]:
     """ Get all users, only for the superuser"""
@@ -109,3 +138,4 @@ async def get_user_id(user_id: int, user: User = Depends(get_current_superuser))
 # async def get_user(**kwargs) -> User:
 #     user = await UsersRepo.get_one(**kwargs)  # get_one(email="firm1@in.ua")
 #     return user
+

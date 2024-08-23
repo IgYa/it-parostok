@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, func, Boolean, TIMESTAMP, JSON
+from sqlalchemy import ForeignKey, Boolean, JSON
 from typing import List, Optional
-from datetime import datetime
-from db import Model
+from db import Model, intpk, my_datetime
 
 
 class CategoriaOrm(Model):
@@ -15,7 +14,7 @@ class CategoriaOrm(Model):
         """
     __tablename__ = "categories"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[intpk]
     name: Mapped[str]
     description: Mapped[Optional[str]]
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
@@ -42,7 +41,7 @@ class ProjectOrm(Model):
         """
     __tablename__ = "projects"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[intpk]
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id",
                                                     onupdate="RESTRICT",
                                                     ondelete="RESTRICT"))
@@ -52,8 +51,9 @@ class ProjectOrm(Model):
     title: Mapped[str]
     text: Mapped[str]
     photos: Mapped[Optional[List[str]]] = mapped_column(JSON)
-    created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=False), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=False), server_default=func.now())
+    created_at: Mapped[my_datetime]
+    updated_at: Mapped[my_datetime]
+        # onupdate=func.now(), onupdate=datetime.utcnow or create trigger
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # Визначення зв'язку між ProjectOrm і UserOrm
