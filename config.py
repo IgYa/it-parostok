@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DB_NAME = getenv("DB_NAME")
+DB2_NAME = getenv("DB2_NAME")
 DB_USER = getenv("DB_USER")
 DB_PASSWORD = getenv("DB_PASSWORD")
 DB_HOST = getenv("DB_HOST")
@@ -17,6 +18,7 @@ PATH_IMAGES = getenv("PATH_IMAGES")
 
 ADMIN_EMAIL = getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = getenv("ADMIN_PASSWORD")
+PASS_KEY = getenv("PASS_KEY")
 
 
 from pydantic import BaseModel

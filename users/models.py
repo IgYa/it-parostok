@@ -24,7 +24,7 @@ class UserOrm(Model):
                      the file name is formed from the current date and time,
                      the files are stored in the folder static/images,
                      format "%Y%m%d_%H%M%S_%f".jpg, .png, .jpeg, .gif, .webp
-        created_at (date): Date user was created, defaults to now
+        created_at (datetime): Date and time user was created, defaults to now
         last_login (datetime): Date and time last login of this user
         is_super: Whether this user is superuser, defaults to False
         is_active (bool): Whether this user is active, defaults to True

@@ -40,7 +40,7 @@ def upgrade() -> None:
             sa.Column('surname', sa.String(), nullable=True),
             sa.Column('who_are_you', sa.Enum('employee', 'employer', name='role'), nullable=True),
             sa.Column('photo', sa.String(), nullable=True),
-            sa.Column('created_at', sa.Date(), server_default=sa.text('CURRENT_DATE'), nullable=False),
+            sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
             sa.Column('last_login', sa.DateTime(), nullable=True),
             sa.Column('is_super', sa.Boolean(), server_default='false', nullable=False),
             sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),

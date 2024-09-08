@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from typing import Optional, Literal
-from datetime import date, datetime
+from datetime import datetime
 from users.models import Role
 
 
@@ -29,7 +29,7 @@ class User(UserUpdate):
     """ Validation scheme for user """
     id: int
     email: EmailStr
-    created_at: date
+    created_at: datetime
     last_login: Optional[datetime] = None
 
     # is_super: bool - this field is available only for the superuser
