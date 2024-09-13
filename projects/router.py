@@ -51,10 +51,19 @@ async def get_user_projects(current_user: User = Depends(get_current_user)) -> l
 
 
 @router.get("/all")
-async def get_all_projects(current_user: User = Depends(get_current_superuser)) -> list[Project]:
-    """ Get all Projects, only superuser"""
-    if current_user:
-        return await ProjectsRepo.get_all()
+async def get_all_projects() -> list[Project]:  #
+    """ Get all Projects"""
+    # current_user: User = Depends(get_current_superuser)
+    # if current_user:
+    return await ProjectsRepo.get_all()
+
+
+@router.get("/active")
+async def get_active_projects() -> list[dict]:  #
+    """ Get all Projects"""
+    # current_user: User = Depends(get_current_superuser)
+    # if current_user:
+    return await ProjectsRepo.get_active_projects()
 
 
 # @router.get("/image/{file_name}", response_class=FileResponse)

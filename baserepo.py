@@ -1,3 +1,5 @@
+from sqlalchemy import text
+
 from db import async_session as session
 from sqlalchemy import select, insert
 from fastapi import UploadFile, HTTPException
@@ -7,7 +9,6 @@ from config import PATH_IMAGES
 import aiofiles
 from PIL import Image
 from io import BytesIO
-import shutil
 
 
 class BaseRepo:
@@ -63,12 +64,34 @@ class BaseRepo:
 
         return current_user
 
-    @staticmethod
-    async def add_image(file: UploadFile) -> str:
-        """ Add an image file to the Project"""
+    @classmethod
+    async def resize_image(cls, image: Image.Image, extension: str) -> bytes:
+        """Resize the image to a maximum of 1920x1080"""
+        MAX_WIDTH = 1920
+        MAX_HEIGHT = 1080
 
-        if file.size > 1048576:  # maximum image size - 1 Мб
-            raise HTTPException(status_code=400, detail="File size exceeds 1 Mb")
+        # Resize the image, maintaining the aspect ratio
+        image.thumbnail((MAX_WIDTH, MAX_HEIGHT))
+
+        # Save the resized image to a buffer
+        buffer = BytesIO()
+        if extension in [".jpg", ".jpeg"]:
+            image.save(buffer, format="JPEG", quality=85)
+        elif extension == ".png":
+            image.save(buffer, format="PNG", optimize=True)
+        elif extension == ".webp":
+            image.save(buffer, format="WEBP", quality=85)
+        else:
+            image.save(buffer, format=image.format)  # Default save for other formats
+
+        buffer.seek(0)
+        return buffer.read()
+
+    @classmethod
+    async def add_image(cls, file: UploadFile) -> str:
+        """ Add an image file to the Project and resize if it exceeds 2 MB"""
+
+        MAX_FILE_SIZE = 2 * 1024 * 1024  # maximum image size - 2 Мб
 
         # Checking the file extension
         extension = os.path.splitext(file.filename)[1].lower()
@@ -82,8 +105,13 @@ class BaseRepo:
         try:
             image = Image.open(BytesIO(content))
             image.verify()
+            image = Image.open(BytesIO(content))  # Reopen image for further processing
         except Exception:
             raise HTTPException(status_code=415, detail="Invalid image file")
+
+        # If image size is greater than 2 MB, resize it
+        if len(content) > MAX_FILE_SIZE:
+            content = await cls.resize_image(image, extension)
 
         # Get the current date and time in the required format, form a new file name
         now = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
@@ -103,3 +131,40 @@ class BaseRepo:
 
         return new_filename
 
+
+    @staticmethod
+    async def get_view(view) -> list[dict]:
+        """ Get all model data """
+        async with session() as ss:
+            query = select(view)
+            result = await ss.execute(query)
+            return result.scalars().all()
+
+    @staticmethod
+    async def get_active_projects() -> list[dict]:
+        # Робимо запит для отримання активних проектів
+        async with session() as ss:
+            sql = """
+                SELECT 
+                    p.id,
+                    p.title,
+                    p.text,
+                    p.photos,
+                    p.created_at,
+                    p.updated_at,
+                    CONCAT(u.name, ' ', u.surname) AS user_fullname,
+                    c.name AS category_name
+                FROM 
+                    projects p
+                JOIN 
+                    users u ON p.user_id = u.id
+                JOIN 
+                    categories c ON p.cat_id = c.id
+                WHERE 
+                    p.is_active = true;
+                """
+
+            result = await ss.execute(text(sql))  # Асинхронне виконання запиту
+            projects = result.mappings().all()  # Перетворення результату на відображення (mapping)
+
+            return projects  #[dict(row) for row in projects]  # Перетворення в список словників
