@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, Boolean, JSON
+from sqlalchemy import ForeignKey, Boolean, JSON, String
 from typing import List, Optional
-from db import Model, intpk, my_datetime
+from db import Model, intpk, my_datetime, is_active, likes
 
 
 class CategoriaOrm(Model):
@@ -17,7 +17,7 @@ class CategoriaOrm(Model):
     id: Mapped[intpk]
     name: Mapped[str]
     description: Mapped[Optional[str]]
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    is_active: Mapped[is_active]
 
     # project = relationship("ProjectORM", back_populates="categoria")
 
@@ -51,10 +51,18 @@ class ProjectOrm(Model):
     title: Mapped[str]
     text: Mapped[str]
     photos: Mapped[Optional[List[str]]] = mapped_column(JSON)
+    views: Mapped[Optional[likes]]
+    likes: Mapped[Optional[likes]]
+    tags: Mapped[Optional[List[str]]] = mapped_column(JSON)  # ["#Landscapes", "#Foto", "#Architecture"]
+    contenttype: Mapped[Optional[str]]   # ["Photographs", "Video", "3D", "Drawings", "Vector"]
+    orientation: Mapped[Optional[str]]  # ["Horizontal", "Vertical"]
+    size: Mapped[Optional[str]]  # ["Large", "Medium", "Small"]
+    colorscheme: Mapped[Optional[str]]  # ["Specific color", "Color", "Black and white"]
+    popularity: Mapped[Optional[str]]  # ["Most liked", "Most commented", "Most viewed"]
     created_at: Mapped[my_datetime]
     updated_at: Mapped[my_datetime]
         # onupdate=func.now(), onupdate=datetime.utcnow or create trigger
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    is_active: Mapped[is_active]
 
     # Визначення зв'язку між ProjectOrm і UserOrm
     user = relationship("UserOrm", back_populates="project")

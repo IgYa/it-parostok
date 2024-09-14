@@ -18,13 +18,23 @@ async def create_user(user_data: UserAdd) -> dict:
     """ Create a new user """
 
     # check if the entered email already exists in the database
-    existing_user = await UsersRepo.get_one(email=user_data.email)
+    existing_user = await UsersRepo.get_one(email=user_data.email.lower().strip())
     if existing_user:
         raise HTTPException(status_code=409, detail="Such a user already exists")
 
-    hashed_password = get_password_hash(user_data.password)
-    await UsersRepo.set_one(email=user_data.email, password=hashed_password)
-    return {"message": "New user added"}
+    hashed_password = get_password_hash(user_data.password.strip())
+    await UsersRepo.set_one(
+        email=user_data.email.lower().strip(),
+        password=hashed_password,
+        name=user_data.name.strip(),
+        surname=user_data.surname.strip(),
+        photo=user_data.photo
+    )
+    return {
+        "email": user_data.email.lower().strip(),
+        "name": user_data.name.strip(),
+        "surname": user_data.surname.strip(),
+        "photo": user_data.photo}
 
 
 @router.post("/login")

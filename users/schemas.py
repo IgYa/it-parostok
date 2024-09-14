@@ -8,21 +8,28 @@ class UserAdd(BaseModel):
     """ Validation scheme for adding a new user """
     email: EmailStr
     password: str
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    photo: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
     """ Validation scheme for updating a user """
     name: Optional[str] = None
     surname: Optional[str] = None
-    who_are_you: Optional[Literal["employee", "employer"]] = None
+    occupation: Optional[str] = None
+    company: Optional[str] = None
     photo: Optional[str] = None
+    location: Optional[str] = None
+    city: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
+    # who_are_you: Optional[Literal["employee", "employer"]] = None
 
-    @field_validator("who_are_you", mode="before")
-    def convert_role_to_string(cls, value):
-        if isinstance(value, Role):
-            return value.value
-        return value
+    # @field_validator("who_are_you", mode="before")
+    # def convert_role_to_string(cls, value):
+    #     if isinstance(value, Role):
+    #         return value.value
+    #     return value
 
 
 class User(UserUpdate):

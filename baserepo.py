@@ -91,7 +91,7 @@ class BaseRepo:
     async def add_image(cls, file: UploadFile) -> str:
         """ Add an image file to the Project and resize if it exceeds 2 MB"""
 
-        MAX_FILE_SIZE = 2 * 1024 * 1024  # maximum image size - 2 Мб
+        MAX_FILE_SIZE = 1024 * 1024  # maximum image size - 1 Мб
 
         # Checking the file extension
         extension = os.path.splitext(file.filename)[1].lower()
@@ -149,11 +149,19 @@ class BaseRepo:
                     p.id,
                     p.title,
                     p.text,
-                    p.photos,
-                    p.created_at,
-                    p.updated_at,
-                    CONCAT(u.name, ' ', u.surname) AS user_fullname,
-                    c.name AS category_name
+                    p.photos as image,
+                    p.created_at as postedDate,
+                    p.views,
+                    p.likes,
+                    p.tags,
+                    p.contenttype,
+                    p.orientation,
+                    p.size,
+                    p.colorscheme,
+                    p.popularity,
+                    CONCAT(u.name, ' ', u.surname) AS author,
+                    u.photo as authorAvatar,
+                    c.name AS category
                 FROM 
                     projects p
                 JOIN 

@@ -4,7 +4,7 @@ from sqlalchemy import String, Enum, Boolean
 from pydantic import EmailStr
 from datetime import date, datetime
 from enum import Enum as PyEnum
-from db import Model, intpk, my_datetime
+from db import Model, intpk, my_datetime, is_active
 
 
 class Role(PyEnum):
@@ -37,12 +37,15 @@ class UserOrm(Model):
     password: Mapped[str] = mapped_column(String, nullable=False)
     name: Mapped[Optional[str]]
     surname: Mapped[Optional[str]]
-    who_are_you: Mapped[Optional[Role]] = mapped_column(Enum(Role))
+    occupation: Mapped[Optional[str]]
+    company: Mapped[Optional[str]]
     photo: Mapped[Optional[str]]
+    location: Mapped[Optional[str]]
+    city: Mapped[Optional[str]]
     created_at: Mapped[my_datetime]
     last_login: Mapped[Optional[datetime]]
     is_super: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    is_active: Mapped[is_active]
 
     def __str__(self):
         return f"{self.name} {self.surname} ({self.email})"

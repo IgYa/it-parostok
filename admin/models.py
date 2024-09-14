@@ -6,7 +6,7 @@ from config import PATH_IMAGES
 
 
 class UserAdmin(ModelView, model=UserOrm):
-    column_list = [UserOrm.id, UserOrm.email, UserOrm.name, UserOrm.surname, UserOrm.who_are_you, UserOrm.photo]
+    column_list = [UserOrm.id, UserOrm.email, UserOrm.name, UserOrm.surname, UserOrm.photo]
     column_details_exclude_list = [UserOrm.password]
     can_delete = False
     name = "User"
